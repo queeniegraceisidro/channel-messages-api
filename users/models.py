@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from core.models import CommonInfo
 
+from .managers import UserManager
+
 
 class User(AbstractBaseUser, PermissionsMixin, CommonInfo):
     """ Overriding User model
@@ -16,6 +18,8 @@ class User(AbstractBaseUser, PermissionsMixin, CommonInfo):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ("first_name", "last_name")
+
+    objects = UserManager()
 
     def __str__(self):
         return f"{self.email}"
