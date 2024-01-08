@@ -1,7 +1,8 @@
 from django.db import models
+from core.models import CommonInfo
 
 
-class Channel(models.Model):
+class Channel(CommonInfo):
     name = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -10,7 +11,7 @@ class Channel(models.Model):
         return self.name
 
 
-class ChannelUser(models.Model):
+class ChannelUser(CommonInfo):
     name = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -19,7 +20,7 @@ class ChannelUser(models.Model):
         return self.name
 
 
-class ChannelMessage(models.Model):
+class ChannelMessage(CommonInfo):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
     sender = models.ForeignKey(ChannelUser, on_delete=models.CASCADE)
     message = models.TextField()
