@@ -3,7 +3,7 @@ from .models import Channel
 from .serializers import ChannelSerializer
 
 
-class ChannelViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+class ChannelViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
 
     queryset = Channel.objects.all().order_by("-pk")
     serializer_class = ChannelSerializer
