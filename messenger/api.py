@@ -1,9 +1,9 @@
-from rest_framework import mixins, viewsets
+from core.viewsets.mixins import AppModelViewSet
+
 from .models import Channel
 from .serializers import ChannelSerializer
 
 
-class ChannelViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
-
+class ChannelViewSet(AppModelViewSet):
     queryset = Channel.objects.all().order_by("-pk")
     serializer_class = ChannelSerializer

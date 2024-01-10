@@ -51,3 +51,32 @@ class TestChannelViewSet:
         assert response.status_code == http_client.OK
         assert response["content-type"] == "application/json"
         assert response.data['name'] == new_name
+
+    def test_delete(self, client):
+        # Arrange
+        prev_name = 'new test channel to be deleted'
+        data = {'name': prev_name}
+
+        # Act
+        response = client.post(self.endpoint, data)
+
+        # Assert
+        assert response.status_code == http_client.CREATED
+        assert response["content-type"] == "application/json"
+        assert response.data['name'] == prev_name
+
+        # Arrange
+        delete_id = response.data['id']
+        delete_endpoint = f'{self.endpoint}{delete_id}/'
+
+        # Act
+        response = client.delete(delete_endpoint)
+
+        # Assert
+        assert response.status_code == http_client.NO_CONTENT
+
+        # Act
+        response = client.get(delete_endpoint)
+
+        # Assert
+        assert response.status_code == http_client.NOT_FOUND
