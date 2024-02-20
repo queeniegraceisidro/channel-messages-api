@@ -149,4 +149,15 @@ AUTH_USER_MODEL = "users.User"
 
 # REST framework settings
 
-REST_FRAMEWORK = {"DATETIME_FORMAT": "%Y-%m-%d %I:%M %p"}
+REST_FRAMEWORK = {
+    "DATETIME_FORMAT": "%Y-%m-%d %I:%M %p",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
+}
+
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "channels-auth",
+    "JWT_AUTH_REFRESH_COOKIE": "channels-refresh",
+}
