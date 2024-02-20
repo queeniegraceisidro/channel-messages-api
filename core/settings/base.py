@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+from decouple import Csv, config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,32 +22,37 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&3!=grsf-$9vpp-*(3!vlnpz%3!cjt#t17ex-8ist+zd^mk&h0'
+SECRET_KEY = config(
+    'SECRET_KEY', default="django-insecure-&3!=grsf-$9vpp-*(3!vlnpz%3!cjt#t17ex-8ist+zd^mk&h0")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=[], cast=Csv())
 
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
 
-    # Third-party apps
+THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
+]
 
-    # System apps
+LOCAL_APPS = [
     'messenger',
     'users',
 ]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,8 +91,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': config('DATABASE_ENGINE', default='django.db.backends.postgresql_psycopg2'),
+        'NAME': config('DATABASE_NAME', default='project_ci_test'),
+        'USER': config('DATABASE_USER', default='postgres'),
+        'PASSWORD': config('DATABASE_PASSWORD', default='password'),
+        'HOST': config('DATABASE_HOST', default='postgres'),
     }
 }
 
