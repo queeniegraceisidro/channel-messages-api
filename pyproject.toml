@@ -13,6 +13,7 @@ django-cors-headers = "^4.3.1"
 python-decouple = "^3.8"
 dj-rest-auth = "^5.0.2"
 djangorestframework-simplejwt = "^5.3.1"
+psycopg2-binary = "^2.9.9"
 
 [tool.poetry.group.test.dependencies]
 pytest-django = "^4.7.0"

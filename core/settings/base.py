@@ -93,16 +93,29 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": config("DATABASE_ENGINE", default="django.db.backends.sqlite3"),
-        "NAME": config("DATABASE_NAME", default="db.sqlite3"),
-        "USER": config("DATABASE_USER", default="user"),
-        "PASSWORD": config("DATABASE_PASSWORD", default=""),
-        "HOST": config("DATABASE_HOST", default="localhost"),
-    }
-}
 
+# Get database configuration based on the selected mode
+def get_database_config():
+    if config("USE_POSTGRES", default=False, cast=bool):
+        return {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql_psycopg2",
+                "NAME": config("DATABASE_NAME", default="project_ci_test"),
+                "USER": config("DATABASE_USER", default="postgres"),
+                "PASSWORD": config("DATABASE_PASSWORD", default="password"),
+                "HOST": config("DATABASE_HOST", default="localhost"),
+            }
+        }
+    else:
+        return {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": config("DATABASE_NAME", default="db.sqlite3"),
+            }
+        }
+
+
+DATABASES = get_database_config()
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
