@@ -1,6 +1,7 @@
 import factory
 
-from messenger.models import Channel
+from messenger import models as messenger_models
+from tests.factories.users.user import User
 
 
 class Channel(factory.django.DjangoModelFactory):
@@ -9,6 +10,7 @@ class Channel(factory.django.DjangoModelFactory):
     """
 
     name = "group-hangout"
+    owner = factory.SubFactory(User)
 
     class Meta:
-        model = Channel
+        model = messenger_models.Channel

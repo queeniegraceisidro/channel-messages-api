@@ -25,7 +25,6 @@ class User(factory.django.DjangoModelFactory):
 
     is_superuser = False
     is_staff = False
-    is_active = True
 
     class Params:
         # declare a trait that adds relevant parameters for admin users
