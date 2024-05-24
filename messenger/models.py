@@ -13,7 +13,9 @@ class Channel(CommonInfo):
 
 
 class ChannelMember(CommonInfo):
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
+    channel = models.ForeignKey(
+        Channel, on_delete=models.CASCADE, related_name="members"
+    )
     member = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
 
     def __str__(self):
