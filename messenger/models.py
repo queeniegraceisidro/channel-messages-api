@@ -20,6 +20,9 @@ class Channel(CommonInfo):
     def _invite_code_exists(code):
         return Channel.objects.filter(invite_code=code).exists()
 
+    def messenger_name(self):
+        return "channel_%s" % str(self.name).replace(" ", "_")
+
     def generate_invite_code(self):
         length = 8
 
