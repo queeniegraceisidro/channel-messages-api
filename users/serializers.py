@@ -1,8 +1,12 @@
-from rest_framework import serializers
-from django.contrib.auth.models import User
 from allauth.account.adapter import get_adapter
-from django.core.exceptions import ValidationError
 from allauth.account.utils import setup_user_email
+from dj_rest_auth.serializers import (
+    UserDetailsSerializer as DjRestAuthUserDetailsSerializer,
+)
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from rest_framework import serializers
 
 
 class UserRegistrationSerializer(serializers.Serializer):
@@ -60,3 +64,27 @@ class UserRegistrationSerializer(serializers.Serializer):
         user.save()
         setup_user_email(request, user, [])
         return user
+
+
+class UserDetailsSerializer(DjRestAuthUserDetailsSerializer):
+    """
+    User model w/o password
+    """
+
+    class Meta:
+        extra_fields = []
+        # see https://github.com/iMerica/dj-rest-auth/issues/181
+        # UserModel.XYZ causing attribute error while importing other
+        # classes from `serializers.py`. So, we need to check whether the auth model has
+        # the attribute or not
+        if hasattr(get_user_model(), "USERNAME_FIELD"):
+            extra_fields.append(get_user_model().USERNAME_FIELD)
+        if hasattr(get_user_model(), "EMAIL_FIELD"):
+            extra_fields.append(get_user_model().EMAIL_FIELD)
+        if hasattr(get_user_model(), "first_name"):
+            extra_fields.append("first_name")
+        if hasattr(get_user_model(), "last_name"):
+            extra_fields.append("last_name")
+        model = get_user_model()
+        fields = ("id", *extra_fields)
+        read_only_fields = ("email",)

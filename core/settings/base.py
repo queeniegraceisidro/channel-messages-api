@@ -194,4 +194,5 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "channels-auth",
     "JWT_AUTH_REFRESH_COOKIE": "channels-refresh",
     "REGISTER_SERIALIZER": "users.serializers.UserRegistrationSerializer",
+    "USER_DETAILS_SERIALIZER": "users.serializers.UserDetailsSerializer",
 }
