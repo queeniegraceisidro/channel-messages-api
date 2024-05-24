@@ -25,6 +25,6 @@ def test_get_channel_by_code():
     # Assert that we have 2 channels...
     assert channels.count() == 2
 
-    # And those two channels are the channels that the user is a member of.
-    assert channel_a.pk == channels[0].pk
-    assert channel_b.pk == channels[1].pk
+    # And those two channels are the channels that the user is a member of
+    assert channel_a.pk == channels[0].channel.pk
+    assert channel_b.pk == channels[1].channel.pk

@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.permissions.base import IsOwnerPermission
+from core.permissions.channel import IsChannelMemberPermission
 from core.viewsets.mixins import AppModelViewSet
 
 from messenger import queries as messenger_queries
@@ -24,6 +25,11 @@ class ChannelViewSet(AppModelViewSet):
             or self.action == "destroy"
         ):
             return [permission() for permission in [IsAuthenticated, IsOwnerPermission]]
+        elif self.action == "retrieve":
+            return [
+                permission()
+                for permission in [IsAuthenticated, IsChannelMemberPermission]
+            ]
         return super().get_permissions()
 
     def perform_create(self, serializer):
@@ -73,6 +79,24 @@ class ChannelViewSet(AppModelViewSet):
         channel_member.is_valid(raise_exception=True)
         channel_member.save()
         serializer = self.get_serializer(channel)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=["GET"],
+        permission_classes=[IsAuthenticated, IsChannelMemberPermission],
+    )
+    def messages(self, request, pk=None):
+        messages = messenger_queries.get_all_channel_messages(pk)
+        page = self.paginate_queryset(messages)
+        if page is not None:
+            serializer = messenger_serializer.ChannelMessageDisplaySerializer(
+                page, many=True
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = messenger_serializer.ChannelMessageDisplaySerializer(
+            messages, many=True
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
