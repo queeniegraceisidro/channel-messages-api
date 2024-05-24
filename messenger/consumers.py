@@ -24,6 +24,19 @@ def get_channel_async(channel_id) -> Channel | None:
     return result
 
 
+def is_channel_member_async(channel_id, user_id) -> Channel | None:
+    result = None
+
+    def target():
+        nonlocal result
+        result = messenger_queries.is_channel_member(channel_id, user_id)
+
+    thread = threading.Thread(target=target)
+    thread.start()
+    thread.join()
+    return result
+
+
 class ChannelConsumer(AsyncWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
@@ -33,15 +46,32 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.messenger_channel: Channel | None = None
 
-    async def connect(self):
-        # Add permission to access only members of the channel
-        self.user = self.scope["user"]
-        if self.user.is_anonymous:
-            await self.disconnect(401)
-        self.channel_id = self.scope["url_route"]["kwargs"]["channel_id"]
+    def _get_user(self):
+        return self.scope["user"]
 
-        if not messenger_queries.is_channel_member(self.channel_id, self.user.id):
+    def _get_channel_id(self):
+        return self.scope["url_route"]["kwargs"]["channel_id"]
+
+    async def connect(self):
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        if self.name:
+            await self.channel_layer.group_discard(self.name, self.channel_name)
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        self.user = self._get_user()
+        self.channel_id = self._get_channel_id()
+
+        if self.user.is_anonymous:
+            await self.send_error("User is not authenticated")
+            await self.disconnect(401)
+
+        if not is_channel_member_async(self.channel_id, self.user.id):
             # Only members of this channel can access this resource
+            await self.send_error("User is not a member of this channel")
             await self.disconnect(403)
 
         self.messenger_channel = get_channel_async(self.channel_id)
@@ -50,14 +80,6 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         # Join channel group
         await self.channel_layer.group_add(self.name, self.channel_name)
 
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(self.name, self.channel_name)
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
@@ -71,3 +93,6 @@ class ChannelConsumer(AsyncWebsocketConsumer):
         message = event["message"]
         # Send message to WebSocket
         await self.send(text_data=json.dumps({"message": message}))
+
+    async def send_error(self, message):
+        await self.send(text_data=json.dumps({"error": message}))
