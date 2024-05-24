@@ -53,6 +53,9 @@ class ChannelMember(CommonInfo):
     def __str__(self):
         return f"{self.channel.name}-{self.member}"
 
+    class Meta:
+        unique_together = (("channel", "member", "deleted_at"),)
+
 
 class ChannelMessage(CommonInfo):
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE)
