@@ -11,7 +11,7 @@ class Channel(factory.django.DjangoModelFactory):
 
     name = "group-hangout"
     owner = factory.SubFactory(User)
-    invite_code = "QWERTY"
+    invite_code = factory.Sequence(lambda o: f"QWERTYE{o}")
 
     class Meta:
         model = messenger_models.Channel

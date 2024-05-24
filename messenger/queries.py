@@ -1,3 +1,6 @@
+from django.contrib.auth import get_user_model
+from django.db.models.query import QuerySet
+
 from messenger import models as messenger_models
 
 
@@ -32,3 +35,9 @@ def is_channel_member(channel: int, user: int) -> bool:
         pass
 
     return False
+
+
+def get_all_channels_for_user(
+    user: get_user_model(),
+) -> QuerySet[messenger_models.Channel]:
+    return user.channels.all().order_by("id")
