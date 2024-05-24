@@ -25,8 +25,8 @@ class TestChannelViewSet:
         # Assert
         assert response.status_code == http_client.OK
         assert response["content-type"] == "application/json"
-        assert len(response.data) == 1
-        assert response.data[0]["name"] == channel.name
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["name"] == channel.name
 
     def test_channel_list_by_unauthenticated_user(self, client):
         """

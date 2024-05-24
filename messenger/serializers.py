@@ -22,3 +22,12 @@ class ChannelSerializer(serializers.ModelSerializer):
         model = Channel
         fields = ["id", "name", "created_at", "updated_at", "deleted_at"]
         read_only_fields = ("id", "created_at", "updated_at", "deleted_at")
+
+
+class ChannelMemberDisplaySerializer(serializers.Serializer):
+    # Serializes the ChannelMember model for display
+    id = serializers.IntegerField(read_only=True)
+    channel = ChannelSerializer()
+
+    class Meta:
+        model = ChannelMember

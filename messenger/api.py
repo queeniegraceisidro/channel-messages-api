@@ -1,5 +1,5 @@
 from django.db import transaction
-from rest_framework import status
+from rest_framework import status, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ from core.viewsets.mixins import AppModelViewSet
 
 from messenger import queries as messenger_queries
 from messenger import serializers as messenger_serializer
-from .models import Channel
+from .models import Channel, ChannelMember
 
 
 class ChannelViewSet(AppModelViewSet):
@@ -74,3 +74,12 @@ class ChannelViewSet(AppModelViewSet):
         channel_member.save()
         serializer = self.get_serializer(channel)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserChannelsView(viewsets.GenericViewSet, mixins.ListModelMixin):
+    queryset = ChannelMember.objects.all()
+    serializer_class = messenger_serializer.ChannelMemberDisplaySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return messenger_queries.get_all_channels_for_user(self.request.user)
