@@ -57,6 +57,7 @@ class UserRegistrationSerializer(serializers.Serializer):
         if "password_1" in self.cleaned_data:
             try:
                 adapter.clean_password(self.cleaned_data["password_1"], user=user)
+                user.set_password(self.cleaned_data["password_1"])
             except ValidationError as exc:
                 raise serializers.ValidationError(
                     detail=serializers.as_serializer_error(exc)
