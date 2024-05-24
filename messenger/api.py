@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import transaction
 from rest_framework import status, mixins, viewsets
 from rest_framework.decorators import action
@@ -10,7 +12,7 @@ from core.viewsets.mixins import AppModelViewSet
 
 from messenger import queries as messenger_queries
 from messenger import serializers as messenger_serializer
-from .models import Channel, ChannelMember
+from .models import Channel, ChannelMember, ChannelMessage
 
 
 class ChannelViewSet(AppModelViewSet):
@@ -107,3 +109,39 @@ class UserChannelsView(viewsets.GenericViewSet, mixins.ListModelMixin):
 
     def get_queryset(self):
         return messenger_queries.get_all_channels_for_user(self.request.user)
+
+
+class ChannelMessageView(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    queryset = ChannelMessage.objects.all()
+    serializer_class = messenger_serializer.ChannelMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+
+        # Check channel member
+        if not messenger_queries.is_channel_member(
+            self.request.data.get("channel", None), request.user
+        ):
+            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            message = serializer.save()
+
+        headers = self.get_success_headers(serializer.data)
+
+        # Ping the channel websocket that a new message has been sent
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            message.channel.messenger_name(),
+            {
+                "type": "chat.message",
+                "message": serializer.data,
+            },
+        )
+
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from messenger import operations as messenger_operations
 from messenger.models import Channel, ChannelMember, ChannelMessage
 
 
@@ -22,8 +23,14 @@ class ChannelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Channel
-        fields = ["id", "name", "created_at", "updated_at", "deleted_at"]
-        read_only_fields = ("id", "created_at", "updated_at", "deleted_at")
+        fields = ["id", "name", "invite_code", "created_at", "updated_at", "deleted_at"]
+        read_only_fields = (
+            "id",
+            "invite_code",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+        )
 
 
 class ChannelMemberDisplaySerializer(serializers.Serializer):
@@ -56,3 +63,25 @@ class ChannelMessageDisplaySerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = ("id",)
+
+
+class ChannelMessageSerializer(serializers.ModelSerializer):
+    # Serializes the ChannelMessage model
+
+    sender = SenderDisplaySerializer(read_only=True)
+
+    class Meta:
+        model = ChannelMessage
+        fields = (
+            "id",
+            "channel",
+            "sender",
+            "message",
+            "created_at",
+        )
+        read_only_fields = ("id", "sender")
+
+    def create(self, validated_data):
+        return messenger_operations.create_message(
+            sender=self.context["request"].user, **validated_data
+        )
