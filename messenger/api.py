@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core.pagination import CursorPagination
 from core.permissions.base import IsOwnerPermission
 from core.permissions.channel import IsChannelMemberPermission
 from core.viewsets.mixins import AppModelViewSet
@@ -87,6 +88,7 @@ class ChannelViewSet(AppModelViewSet):
         detail=True,
         methods=["GET"],
         permission_classes=[IsAuthenticated, IsChannelMemberPermission],
+        pagination_class=CursorPagination,
     )
     def messages(self, request, pk=None):
         messages = messenger_queries.get_all_channel_messages(pk)
