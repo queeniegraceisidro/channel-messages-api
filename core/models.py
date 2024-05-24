@@ -6,8 +6,9 @@ class ActiveManager(models.Manager):
 
     This class defines a new default query set so the project can always filter data that is active
     """
+
     def get_queryset(self):
-        return super().get_queryset().filter(is_active=True)
+        return super().get_queryset().filter(deleted_at__isnull=True)
 
 
 class CommonInfo(models.Model):
@@ -15,7 +16,7 @@ class CommonInfo(models.Model):
 
     This class is the parent class for all the models
     """
-    is_active = models.BooleanField(default=True)
+
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

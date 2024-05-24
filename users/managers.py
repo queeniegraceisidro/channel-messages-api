@@ -2,9 +2,10 @@ from django.contrib.auth.models import BaseUserManager
 
 
 class UserManager(BaseUserManager):
-    """ User manager
+    """User manager
     Extends Django's base user manager
     """
+
     def create_user(self, email, password=None, **kwargs):
         """
         Creates a normal user
@@ -32,7 +33,6 @@ class UserManager(BaseUserManager):
         :return: user
         """
         user = self.create_user(email, password, **kwargs)
-        user.is_active = True
         user.is_superuser = True
         user.is_staff = True
         user.save()
