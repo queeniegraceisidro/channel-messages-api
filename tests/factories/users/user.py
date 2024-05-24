@@ -18,7 +18,7 @@ class User(factory.django.DjangoModelFactory):
     email = factory.Sequence(
         lambda o: f"{fake.first_name()}{fake.last_name()}{o}@{fake.free_email_domain()}".lower()
     )
-    username = factory.LazyAttribute(lambda o: fake.profile()["username"])
+    username = factory.Sequence(lambda o: f"{fake.user_name()}{o}")
     first_name = factory.LazyAttribute(lambda o: fake.first_name())
     last_name = factory.LazyAttribute(lambda o: fake.last_name())
     password = factory.django.Password("SamplePassword")
