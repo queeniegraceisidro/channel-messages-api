@@ -41,3 +41,11 @@ def get_all_channels_for_user(
     user: get_user_model(),
 ) -> QuerySet[messenger_models.Channel]:
     return user.channels.all().order_by("id")
+
+
+def get_all_channel_messages(
+    channel_id: int,
+) -> QuerySet[messenger_models.ChannelMessage]:
+    return messenger_models.ChannelMessage.objects.filter(channel=channel_id).order_by(
+        "-id"
+    )
