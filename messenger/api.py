@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.permissions.base import IsOwnerPermission
+from core.permissions.channel import IsChannelMemberPermission
 from core.viewsets.mixins import AppModelViewSet
 
 from messenger import queries as messenger_queries
@@ -24,6 +25,11 @@ class ChannelViewSet(AppModelViewSet):
             or self.action == "destroy"
         ):
             return [permission() for permission in [IsAuthenticated, IsOwnerPermission]]
+        elif self.action == "retrieve":
+            return [
+                permission()
+                for permission in [IsAuthenticated, IsChannelMemberPermission]
+            ]
         return super().get_permissions()
 
     def perform_create(self, serializer):
