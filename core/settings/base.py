@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import Csv, config
@@ -196,3 +197,13 @@ REST_AUTH = {
     "REGISTER_SERIALIZER": "users.serializers.UserRegistrationSerializer",
     "USER_DETAILS_SERIALIZER": "users.serializers.UserDetailsSerializer",
 }
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=0),
+}
+
+# CORS Headers	# CORS Headers
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", default="http://localhost:8080", cast=Csv()
+)
