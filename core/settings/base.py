@@ -181,6 +181,8 @@ AUTH_USER_MODEL = "users.User"
 # REST framework settings
 
 REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 15,
     "DATETIME_FORMAT": "%Y-%m-%d %I:%M %p",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
