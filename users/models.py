@@ -13,7 +13,7 @@ class User(AbstractBaseUser, PermissionsMixin, CommonInfo):
     first_name = models.CharField(max_length=225)
     last_name = models.CharField(max_length=225)
     username = models.CharField(max_length=40, unique=True)
-    email = models.EmailField(max_length=500, unique=True)
+    email = models.EmailField(max_length=500, unique=True, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
 
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -28,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin, CommonInfo):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.handle = self.trimmed_email
+            self.handle = self.username
 
         return super(User, self).save(*args, **kwargs)
 
@@ -47,4 +47,5 @@ class User(AbstractBaseUser, PermissionsMixin, CommonInfo):
 
     @property
     def trimmed_email(self):
-        return self.email.split("@")[0]
+        if self.email:
+            return f"{self.email}".split("@")[0]

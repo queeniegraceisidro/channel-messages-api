@@ -49,6 +49,10 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
 ]
 
 LOCAL_APPS = [
@@ -67,6 +71,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -186,4 +191,5 @@ REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "channels-auth",
     "JWT_AUTH_REFRESH_COOKIE": "channels-refresh",
+    "REGISTER_SERIALIZER": "users.serializers.UserRegistrationSerializer",
 }
