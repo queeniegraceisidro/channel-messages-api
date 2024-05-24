@@ -7,16 +7,12 @@ from messenger import queries as messenger_queries
 from .models import Channel
 
 
-def get_channel(channel_id) -> Channel:
-    return messenger_queries.get_channel_by_id(channel_id)
-
-
-def get_channel_async(channel_id) -> Channel | None:
+def _get_channel(channel_id) -> Channel | None:
     result = None
 
     def target():
         nonlocal result
-        result = get_channel(channel_id)
+        result = messenger_queries.get_channel_by_id(channel_id)
 
     thread = threading.Thread(target=target)
     thread.start()
@@ -24,7 +20,7 @@ def get_channel_async(channel_id) -> Channel | None:
     return result
 
 
-def is_channel_member_async(channel_id, user_id) -> Channel | None:
+def _is_channel_member(channel_id, user_id) -> Channel | None:
     result = None
 
     def target():
@@ -83,10 +79,10 @@ class ChannelConsumer(BaseConsumer):
     async def connect(self):
         await super().connect()
         self.channel_id = self._get_channel_id()
-        self.messenger_channel = get_channel_async(self.channel_id)
+        self.messenger_channel = _get_channel(self.channel_id)
         self.name = self.messenger_channel.messenger_name()
 
-        if not is_channel_member_async(self.channel_id, self.user.id):
+        if not _is_channel_member(self.channel_id, self.user.id):
             # Only members of this channel can access this resource
             await self.accept()
             await self.send_error("User is not a member of this channel")
