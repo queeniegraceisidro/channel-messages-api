@@ -8,6 +8,13 @@ class ChannelUnavailable(Exception):
     pass
 
 
+def get_channel_by_id(channel_id: int) -> messenger_models.Channel:
+    try:
+        return messenger_models.Channel.objects.get(pk=channel_id, deleted_at=None)
+    except messenger_models.Channel.DoesNotExist:
+        raise ChannelUnavailable("Channel does not exist.")
+
+
 def get_channel_by_code(code: str) -> messenger_models.Channel:
 
     # Checks for empty string

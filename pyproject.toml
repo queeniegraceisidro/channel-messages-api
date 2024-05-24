@@ -16,6 +16,8 @@ djangorestframework-simplejwt = "^5.3.1"
 psycopg2-binary = "^2.9.9"
 channels = {extras = ["daphne"], version = "^4.1.0"}
 channels-redis = "^4.2.0"
+pytest-django = "^4.8.0"
+pytest-asyncio = "^0.23.7"
 
 [tool.poetry.group.test.dependencies]
 pytest-django = "^4.7.0"
