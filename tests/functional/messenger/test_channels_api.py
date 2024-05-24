@@ -244,3 +244,80 @@ class TestChannelViewSet:
         # Assert
         assert response.status_code == http_client.FORBIDDEN
         assert response["content-type"] == "application/json"
+
+    def test_channel_join_using_correct_invite_code_by_authenticated_user(self, client):
+        """
+        Given: An authenticated user that wants to join a channel using an invitation code
+        Expects: The user joins the channel
+        """
+
+        # Arrange
+        # Create channel that the user wants to join
+        invite_code = "JoinCode"
+        channel = factories.Channel(invite_code=invite_code)
+
+        # Create a user that we will authenticate and this user will try to join the channel using the code
+        password = "OwnerPassword"
+        authenticated_user = factories.User(password=password)
+        client.authenticate_user(authenticated_user.username, password)
+
+        join_channel_endpoint = reverse("messenger:channel-join")
+
+        # Act
+        # Authenticated user tries to join the channel
+        response = client.post(join_channel_endpoint, {"invite_code": invite_code})
+
+        # Assert
+        assert response.status_code == http_client.OK
+        assert response["content-type"] == "application/json"
+
+    def test_channel_join_using_correct_invite_code_by_unauthenticated_user(
+        self, client
+    ):
+        """
+        Given: An unauthenticated user that wants to join a channel using an invitation code
+        Expects: The user is not authorized to join the channel
+        """
+
+        # Arrange
+        # Create channel that the user wants to join
+        invite_code = "Right"
+        channel = factories.Channel(invite_code=invite_code)
+
+        # Create a user that will try to join the channel using the code
+        user = factories.User(password="OwnerPassword")
+
+        join_channel_endpoint = reverse("messenger:channel-join")
+
+        # Act
+        # Unauthenticated user tries to join the channel
+        response = client.post(join_channel_endpoint, {"invite_code": invite_code})
+
+        # Assert
+        assert response.status_code == http_client.UNAUTHORIZED
+        assert response["content-type"] == "application/json"
+
+    def test_channel_join_using_wrong_code_by_authenticated_user(self, client):
+        """
+        Given: An authenticated user that wants to join a channel using a wrong invitation code
+        Expects: The user fails to join the channel
+        """
+
+        # Arrange
+        # Create channel that the user wants to join
+        channel = factories.Channel(invite_code="Right")
+
+        # Create a user that we will authenticate and this user will try to join the channel using the code
+        password = "OwnerPassword"
+        authenticated_user = factories.User(password=password)
+        client.authenticate_user(authenticated_user.username, password)
+
+        join_channel_endpoint = reverse("messenger:channel-join")
+
+        # Act
+        # Authenticated user tries to join the channel
+        response = client.post(join_channel_endpoint, {"invite_code": "Wrong"})
+
+        # Assert
+        assert response.status_code == http_client.BAD_REQUEST
+        assert response["content-type"] == "application/json"
