@@ -321,3 +321,88 @@ class TestChannelViewSet:
         # Assert
         assert response.status_code == http_client.BAD_REQUEST
         assert response["content-type"] == "application/json"
+
+    def test_retrieve_channel_messages_by_member(self, client):
+        """
+        Given: A channel member access channel's messages
+        Expects: A JSON response containing the messages of the channel
+        """
+
+        # Arrange
+        # Create a user and authenticate the user
+        password = "authenticatedUser"
+        user = factories.User(password=password)
+        client.authenticate_user(user.username, password)
+
+        # Let the user join the channel and populate the channel with messages
+        message = "Hello everyone!"
+        channel = factories.Channel(owner=user)
+        factories.ChannelMember(member=user, channel=channel)
+        factories.ChannelMessage(sender=user, channel=channel, message=message)
+
+        channel_messages_endpoint = reverse(
+            "messenger:channel-messages", kwargs={"pk": channel.id}
+        )
+
+        # Act
+        response = client.get(channel_messages_endpoint)
+
+        # Assert
+        assert response.status_code == http_client.OK
+        assert response["content-type"] == "application/json"
+        assert response.data["results"][0]["message"] == message
+        assert response.data["results"][0]["channel"] == channel.id
+        assert response.data["results"][0]["sender"]["id"] == user.id
+
+    def test_retrieve_channel_messages_by_non_member(self, client):
+        """
+        Given: A non-channel member tries to access their messages
+        Expects: Error in retrieving the channel messages
+        """
+
+        # Arrange
+        # Create a user and authenticate the user
+        password = "authenticatedUser"
+        non_member = factories.User(password=password)
+        client.authenticate_user(non_member.username, password)
+
+        # Create a user with a joined channel and populate the channel with messages
+        user = factories.User()
+        channel = factories.Channel(owner=user)
+        factories.ChannelMember(member=user, channel=channel)
+        factories.ChannelMessage(sender=user, channel=channel)
+
+        channel_messages_endpoint = reverse(
+            "messenger:channel-messages", kwargs={"pk": channel.id}
+        )
+
+        # Act
+        response = client.get(channel_messages_endpoint)
+
+        # Assert
+        assert response.status_code == http_client.FORBIDDEN
+        assert response["content-type"] == "application/json"
+
+    def test_retrieve_channel_messages_by_unauthorized_user(self, client):
+        """
+        Given: A channel with messages that an unauthorized user will access
+        Expects: Error in retrieving the channel messages
+        """
+
+        # Arrange
+        # Create a user with a joined channel and populate the channel with messages
+        user = factories.User()
+        channel = factories.Channel(owner=user)
+        factories.ChannelMember(member=user, channel=channel)
+        factories.ChannelMessage(sender=user, channel=channel)
+
+        channel_messages_endpoint = reverse(
+            "messenger:channel-messages", kwargs={"pk": channel.id}
+        )
+
+        # Act
+        response = client.get(channel_messages_endpoint)
+
+        # Assert
+        assert response.status_code == http_client.UNAUTHORIZED
+        assert response["content-type"] == "application/json"

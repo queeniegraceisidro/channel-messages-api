@@ -1,5 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from messenger.models import Channel, ChannelMember
+
+from messenger.models import Channel, ChannelMember, ChannelMessage
 
 
 class ChannelMemberSerializer(serializers.ModelSerializer):
@@ -31,3 +33,26 @@ class ChannelMemberDisplaySerializer(serializers.Serializer):
 
     class Meta:
         model = ChannelMember
+
+
+class SenderDisplaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "first_name", "last_name", "username")
+        read_only_fields = ("id", "first_name", "last_name", "username")
+
+
+class ChannelMessageDisplaySerializer(serializers.ModelSerializer):
+    # Serializes the ChannelMessage model
+    sender = SenderDisplaySerializer()
+
+    class Meta:
+        model = ChannelMessage
+        fields = (
+            "id",
+            "channel",
+            "sender",
+            "message",
+            "created_at",
+        )
+        read_only_fields = ("id",)

@@ -81,6 +81,24 @@ class ChannelViewSet(AppModelViewSet):
         serializer = self.get_serializer(channel)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(
+        detail=True,
+        methods=["GET"],
+        permission_classes=[IsAuthenticated, IsChannelMemberPermission],
+    )
+    def messages(self, request, pk=None):
+        messages = messenger_queries.get_all_channel_messages(pk)
+        page = self.paginate_queryset(messages)
+        if page is not None:
+            serializer = messenger_serializer.ChannelMessageDisplaySerializer(
+                page, many=True
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = messenger_serializer.ChannelMessageDisplaySerializer(
+            messages, many=True
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserChannelsView(viewsets.GenericViewSet, mixins.ListModelMixin):
     queryset = ChannelMember.objects.all()

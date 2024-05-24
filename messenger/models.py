@@ -63,4 +63,4 @@ class ChannelMessage(CommonInfo):
     message = models.TextField()
 
     def __str__(self):
-        return f"{self.channel.name} - {self.sender.name}"
+        return f"{self.channel.name} - {self.sender.username}"
