@@ -17,3 +17,18 @@ def get_channel_by_code(code: str) -> messenger_models.Channel:
         # Only catch if a channel does not exists as other errors
         # such as multiple objects should not happen and if it does, should be logged in sentry...
         raise ChannelUnavailable("Channel does not exist.")
+
+
+def is_channel_member(channel: int, user: int) -> bool:
+    try:
+        channel_member = messenger_models.ChannelMember.objects.get(
+            channel=channel, member=user
+        )
+        if channel_member:
+            return True
+    except messenger_models.ChannelMember.DoesNotExist:
+        # Only catch if a channel does not exists as other errors
+        # such as multiple objects should not happen and if it does, should be logged in sentry...
+        pass
+
+    return False
