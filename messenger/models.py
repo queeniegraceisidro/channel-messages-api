@@ -1,3 +1,7 @@
+import uuid
+
+from utils import logging
+
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -11,6 +15,31 @@ class Channel(CommonInfo):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def _invite_code_exists(code):
+        return Channel.objects.filter(invite_code=code).exists()
+
+    def generate_invite_code(self):
+        length = 8
+
+        # Try to generate code 10 times
+        max_attempts = 10
+        for _ in range(max_attempts):
+            code = uuid.uuid4().hex[:length].upper()
+            if not Channel._invite_code_exists(code):
+                return code
+
+        logging.logger.critical(
+            msg="Channel was not able to generate an invite code",
+            extra={"channel_id": self.pk},
+        )
+        return ""
+
+    def save(self, *args, **kwargs):
+        if not self.invite_code:
+            self.invite_code = self.generate_invite_code()
+        super().save(*args, **kwargs)
 
 
 class ChannelMember(CommonInfo):
